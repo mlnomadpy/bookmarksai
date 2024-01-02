@@ -1,7 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Readability } from "@mozilla/readability";
+import {marked} from 'marked';
+import * as DOMPurify from 'dompurify';
 
-
+marked.setOptions({
+    sanitize: true,
+    sanitizer: function(html) {
+      // Use a library like DOMPurify to sanitize HTML
+      return DOMPurify.sanitize(html);
+    }
+  });
+  
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const searchResults = document.getElementById('searchResults');
@@ -59,8 +68,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     summarizeButton.addEventListener('click', function() {
-        summarizeSelectedPages();
+        const customPrompt = document.getElementById('customPrompt').value;
+        const predefinedPrompt = document.getElementById('predefinedPrompts').value;
+        const prompt = customPrompt || predefinedPrompt;
+    
+        const treatment = document.querySelector('input[name="pageTreatment"]:checked').value;
+        summarizeSelectedPages(prompt, treatment);
     });
+    
 
     function appendResult(url) {
         const resultElement = document.createElement('div');
@@ -74,40 +89,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
         searchResults.appendChild(resultElement);
     }
-
-    async function summarizeSelectedPages() {
+    async function summarizeSelectedPages(prompt, treatment) {
         const selectedURLs = Array.from(searchResults.querySelectorAll('input[type="checkbox"]:checked'))
                                  .map(checkbox => checkbox.value);
     
         if (selectedURLs.length === 0) {
-            alert('Please select at least one page to summarize.');
+            alert('Please select at least one page to process.');
             return;
         }
     
         const summariesContainer = document.getElementById('summaries');
-        summariesContainer.innerHTML = 'Summarizing...';
-        let apiKey = ''; // Placeholder for the API key
+        summariesContainer.innerHTML = 'Processing...';
     
-        // Retrieve the API key from Chrome's storage
-        try {
-            apiKey = await getApiKey();
-        } catch (error) {
-            console.error('Error retrieving API key:', error);
-            throw new Error('API key retrieval failed');
-        }
-
+        let apiKey = await getApiKey();
+    
+        let summarizedContent = treatment === 'combine' ? '' : [];
+    
         for (const url of selectedURLs) {
             try {
                 const content = await getContentFromStorage(url);
-                const summary = await getSummaryFromGeminiPro(content, apiKey);
-                console.log(summary)
-                displaySummary(url, summary, summariesContainer);
+                const bodyText = await getMainContent(content);
+                const summary = await getSummaryFromGeminiPro(bodyText, apiKey, "summarize this: "); // First-level summary
+    
+                if (treatment === 'combine') {
+                    summarizedContent += `Article from ${url}: ${summary}\n\n`;
+                } else {
+                    summarizedContent.push({ url, summary });
+                }
             } catch (error) {
                 console.error('Error summarizing content:', error);
-                summariesContainer.innerHTML += `<div>Error occurred while summarizing ${url}.</div>`;
+                summariesContainer.innerHTML += `<div>Error occurred while processing ${url}.</div>`;
+            }
+        }
+    
+        if (treatment === 'combine') {
+            try {
+                const finalSummary = await getSummaryFromGeminiPro(summarizedContent, apiKey, prompt); // Second-level summary
+                displaySummary('Combined Content', finalSummary, summariesContainer);
+            } catch (error) {
+                console.error('Error in final processing:', error);
+                summariesContainer.innerHTML += `<div>Error occurred while processing combined content.</div>`;
+            }
+        } else {
+            for (const { url, summary } of summarizedContent) {
+                try {
+                    const finalSummary = await getSummaryFromGeminiPro(summary, apiKey, prompt); // Second-level summary for each article
+                    displaySummary(url, finalSummary, summariesContainer);
+                } catch (error) {
+                    console.error('Error in final processing for url:', url, error);
+                    summariesContainer.innerHTML += `<div>Error occurred while processing summary for ${url}.</div>`;
+                }
             }
         }
     }
+    
     
     function getContentFromStorage(url) {
         return new Promise((resolve, reject) => {
@@ -119,6 +154,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+
     async function getMainContent(htmlContent) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(htmlContent, 'text/html');
@@ -130,28 +167,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
 
-    async function getSummaryFromGeminiPro(content, apiKey) {
+    async function getSummaryFromGeminiPro(content, apiKey, prefix) {
         const genAI = new GoogleGenerativeAI(apiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-    
-        // Assuming getMainContent is an async function
-        const bodyText = await getMainContent(content);
-    
-        const prefix = "summarize this: ";
-        const fullContent = prefix + bodyText;
-    
-        console.log(bodyText); // Debugging: Make sure this logs the expected text
-    
+        
+        const fullContent = prefix + content;
+        
         try {
             const result = await model.generateContent(fullContent);
             const response = await result.response;
-            return await response.text(); // Ensure to await the text() call
+            return await response.text();
         } catch (error) {
-            console.error('Error generating summary:', error);
-            throw new Error('Summary generation failed');
+            console.error('Error generating processing:', error);
+            throw new Error('Processing failed');
         }
     }
- 
+    
+
     function getApiKey() {
         return new Promise((resolve, reject) => {
             chrome.storage.sync.get('apiKey', function(data) {
@@ -164,9 +196,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
         
+    
     function displaySummary(url, summary, container) {
         const summaryElement = document.createElement('div');
-        summaryElement.innerHTML = `<b>Summary for ${url}:</b> ${summary}`;
+        summaryElement.innerHTML = `<b>Processing for ${url}:</b> ${marked(summary)}`;
         container.appendChild(summaryElement);
     }
+    
+    
+
+
     });
+

@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Bookmark Content Search",
-    "description": "This extension takes HTML snapshots of bookmarked pages and allows content search.",
-    "version": "1.0",
+    "description": "This extension takes HTML snapshots of bookmarked pages and allows content search then uses AI under the hood with Google's Gemini Pro api that will help the user summarize, explain, and compare between the different bookmarks selected .",
+    "version": "0.1",
     "permissions": [
         "bookmarks",
         "storage",
