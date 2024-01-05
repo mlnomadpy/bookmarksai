@@ -60,3 +60,5 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Google's Gemini Pro API for providing AI capabilities.
 - We used Bard and ChatGPT to guide us through the process of creating this extension
 - All contributors who have helped shape Bookmarks AI.
+- https://github.com/kylelobo/The-Documentation-Compendium
+
