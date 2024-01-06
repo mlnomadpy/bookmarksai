@@ -26,6 +26,7 @@ module.exports = {
         { from: "./content.js", to: "content.js" },
         { from: "./icon.png", to: "icon.png" },
         { from: "./popup.html", to: "popup.html" },
+        { from: "./manifest.json", to: "manifest.json" },
       ],
     }),
   ],
