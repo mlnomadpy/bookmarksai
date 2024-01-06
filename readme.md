@@ -54,7 +54,7 @@ This API key is essential for enabling the AI features in the extension. Make su
 Contributions to Bookmarks AI are welcome.
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the GNU V3 License - see the LICENSE file for details.
 
 ## Acknowledgments
 - Google's Gemini Pro API for providing AI capabilities.
