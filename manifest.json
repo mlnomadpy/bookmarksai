@@ -2,11 +2,13 @@
     "manifest_version": 3,
     "name": "bookmarksai",
     "description": "Google Bookmarks on steroids, takes HTML snapshots of bookmarked pages and allows content search using Google's Gemini Pro AI",
-    "version": "0.2",
+    "version": "0.3",
     "permissions": [
         "bookmarks",
         "storage",
-        "activeTab"
+        "activeTab",
+        "unlimitedStorage",
+        "offscreen"
     ],
     "background": {
         "service_worker": "background.js"
@@ -18,10 +20,20 @@
     "icons": {
         "48": "icon.png"
     },
+    "web_accessible_resources": [
+        {
+          "resources": ["offscreen.html"],
+          "matches": ["<all_urls>"]
+        }
+      ],    
     "content_scripts": [
         {
-            "matches": ["<all_urls>"],
-            "js": ["content.js"]
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
         }
     ]
 }

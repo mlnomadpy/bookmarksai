@@ -1,36 +1,44 @@
-function captureHTML() {
-    // Check if the document is fully loaded
-    if (document.readyState === "complete") {
-        // Capture the HTML of the current document
-        return document.documentElement.outerHTML;
-    } else {
-        // If the document is not fully loaded, return an error message
-        return null;
-    }
+function captureHTML(timeout = 5000) {
+    return new Promise((resolve, reject) => {
+        const captureContent = () => ({
+            html: document.documentElement.outerHTML,
+            title: document.title
+        });
+        console.log(captureContent);
+        if (document.readyState === "complete") {
+            resolve(captureContent());
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            reject(new Error("Timeout waiting for document to load"));
+        }, timeout);
+
+        document.addEventListener('readystatechange', function listener() {
+            if (document.readyState === "complete") {
+                document.removeEventListener('readystatechange', listener);
+                clearTimeout(timer);
+                resolve(captureContent());
+            }
+        });
+    });
 }
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === "captureHTML") {
-        try {
-            let htmlContent = captureHTML();
-            if (htmlContent) {
-                // Send the HTML content back to the background script
-                sendResponse({ html: htmlContent });
-            } else {
-                console.error("Document is not fully loaded.");
-                sendResponse({ error: "Document is not fully loaded." });
-            }
-        } catch (error) {
-            console.error("Error capturing HTML:", error);
-            sendResponse({ error: "Error capturing HTML." });
-        }
+        captureHTML()
+            .then(content => sendResponse(content))
+            .catch(error => {
+                console.error("Error capturing HTML:", error);
+                sendResponse({ error: error.message });
+            });
+        return true; // Indicates that the response is sent asynchronously
     }
 });
 
 // Optional: Add a check to re-capture the HTML if the initial attempt was made too early
-document.addEventListener('readystatechange', function() {
+document.addEventListener('readystatechange', () => {
     if (document.readyState === "complete") {
-        // Trigger capturing of HTML again if needed
         chrome.runtime.sendMessage({ action: "retryCapture" });
     }
 });

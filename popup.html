@@ -1,106 +1,283 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Bookmarks AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
- body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    width: 350px;
-    margin: 0;
-    padding: 15px;
-    background-color: #f7f7f7;
-    color: #333;
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: 600px;
+            height: 600px;
+            margin: 0;
+            padding: 15px;
+            background-color: #f7f7f7;
+            color: #333;
+        }
 
-input[type="text"], select, button {
-    width: 100%;
-    padding: 8px 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensures padding doesn't affect overall width */
-}
+        input[type="text"],
+        select,
+        button {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            /* Ensures padding doesn't affect overall width */
+        }
 
-button {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-button:hover {
-    background-color: #45a049;
-}
+        button:hover {
+            background-color: #45a049;
+        }
 
-.api-key-section, .prompt-section, .options-section {
-    margin-bottom: 15px;
-}
+        .api-key-section,
+        .prompt-section,
+        .options-section {
+            margin-bottom: 15px;
+        }
 
-#searchResults {
-    max-height: 400px;
-    overflow-y: auto;
-    border-top: 1px solid #ddd;
-    padding-top: 10px;
-}
+        #searchResults {
+            max-height: 400px;
+            overflow-y: auto;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
 
-.result {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-}
+        .icon-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #333;
+            padding: 5px;
+            transition: color 0.3s ease;
+        }
 
-.result:hover {
-    background-color: #e9e9e9;
-}
+        .icon-button:hover {
+            color: #0066cc;
+        }
 
-.no-results {
-    padding: 10px;
-    color: #666;
-}
+        .result {
+            position: relative;
+            padding-right: 30px;
+        }
 
+        .result h5 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            display: inline-block;
+            /* Add this line */
+        }
+
+        .toggle-details {
+            position: static;
+            /* Change from absolute to static */
+            display: inline-block;
+            /* Add this line */
+            font-size: 14px;
+            /* Add this line to make the button smaller */
+            padding: 2px 5px;
+            /* Add this line to adjust padding */
+            vertical-align: middle;
+            /* Add this line */
+            max-width: 30px;
+
+        }
+
+        .result a {
+            display: block;
+            margin-bottom: 5px;
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .result button {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 1px solid #ccc;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .result p {
+            margin-top: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .result:hover {
+            background-color: #e9e9e9;
+        }
+
+        .no-results {
+            padding: 10px;
+            color: #666;
+        }
+
+        .backup-section {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .backup-section button,
+        .backup-section input[type="file"] {
+            width: 48%;
+        }
+
+        .tags {
+            margin-top: 5px;
+        }
+
+        .tag {
+            display: inline-block;
+            background-color: #e0e0e0;
+            color: #333;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .citation {
+            display: none;
+            font-family: monospace;
+            font-size: 12px;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .list-view .result {
+            display: flex;
+            align-items: center;
+            padding: 5px 0;
+        }
+
+        .list-view .result h3 {
+            margin: 0 10px;
+        }
+
+        .list-view .result .details {
+            display: none;
+        }
+
+        .card-view {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .card-view .result {
+            width: 48%;
+            margin-bottom: 15px;
+        }
+
+        .backup-section {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .backup-section .icon-button {
+            font-size: 18px;
+            padding: 8px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .backup-section .icon-button:hover {
+            background-color: #e0e0e0;
+        }
     </style>
-<script src="bundle.js"></script>
+    <script src="popup.js"></script>
 
 </head>
+
 <body>
+    <div class="backup-section">
+        <button id="backupButton" class="icon-button" title="Backup Bookmarks"><i class="fas fa-download"></i></button>
+        <button id="loadBackupButton" class="icon-button" title="Load Backup"><i class="fas fa-upload"></i></button>
+        <input type="file" id="loadBackupInput" accept=".json" style="display: none;">
+        <button id="reloadAllBookmarksButton" class="icon-button" title="Reload All Bookmarks"><i
+                class="fas fa-sync-alt"></i></button>
+        <button id="cleanAllBookmarksButton" class="icon-button" title="Clean All Bookmarks"><i
+                class="fas fa-broom"></i></button>
+    </div>
+
     <div class="api-key-section">
         <label for="apiKey">Enter your API Key:</label>
         <input type="text" id="apiKey" placeholder="API Key">
         <button id="saveApiKey">Save API Key</button>
     </div>
-<!-- Custom Prompt Input and Predefined Prompts Dropdown -->
-<div class="prompt-section">
-    <label for="customPrompt">Custom Prompt:</label>
-    <input type="text" id="customPrompt" placeholder="Enter custom prompt">
-    <select id="predefinedPrompts">
-        <option value="">Select a predefined prompt</option>
-        <option value="summarize this: ">Summarize</option>
-        <option value="explain this like I'm five: ">Explain Like I'm Five</option>
-        <option value="create a concise and in a paragraph style while citing the paper and authors: ">Create Related Works</option>
-        <!-- Add more predefined prompts as needed -->
-    </select>
-</div>
-<!-- Options to Treat Pages -->
-<div class="options-section">
-    <label>
-        <input type="radio" name="pageTreatment" value="separate" checked>
-        Treat each page separately
-    </label>
-    <label>
-        <input type="radio" name="pageTreatment" value="combine">
-        Combine contents
-    </label>
-</div>
+    <!-- Custom Prompt Input and Predefined Prompts Dropdown -->
+    <div class="prompt-section">
+        <label for="customPrompt">Custom Prompt:</label>
+        <input type="text" id="customPrompt" placeholder="Enter custom prompt">
+        <select id="predefinedPrompts">
+            <option value="">Select a predefined prompt</option>
+            <option value="summarize this: ">Summarize</option>
+            <option value="explain this like I'm five: ">Explain Like I'm Five</option>
+            <option value="create a concise and in a paragraph style while citing the paper and authors: ">Create Related Works</option>
+        </select>
+        <button id="saveCustomPrompt">Save Custom Prompt</button>
+        <button id="deleteCustomPrompt">Delete Custom Prompt</button>
+    </div>
+        <!-- Options to Treat Pages -->
+    <div class="options-section">
+        <label>
+            <input type="radio" name="pageTreatment" value="separate" checked>
+            Treat each page separately
+        </label>
+        <label>
+            <input type="radio" name="pageTreatment" value="combine">
+            Combine contents
+        </label>
+    </div>
 
-    <input type="text" id="searchInput" placeholder="Search bookmarks...">
-    <div id="searchResults"></div>
+    <div class="view-toggle">
+        <label>
+            <input type="radio" name="viewMode" value="list" checked> List View
+        </label>
+        <label>
+            <input type="radio" name="viewMode" value="card"> Card View
+        </label>
+    </div>
+    <input type="text" id="searchInput" placeholder="Search bookmarks..." aria-label="Search bookmarks">
+    <div id="searchResults" role="list" aria-live="polite" class="list-view"></div>
 
     <!-- Button to trigger summarization -->
-    <button id="summarizeButton">Do da thing on Selected Pages</button>
+    <button id="summarizeButton">Prompt on Selected Pages</button>
 
     <!-- Display the summaries -->
     <div id="summaries"></div>
 
 </body>
+
 </html>
