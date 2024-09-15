@@ -17,7 +17,7 @@ To run Bookmarks AI locally, follow these steps:
 1. Clone the repository:
 
    ```
-   git clone https://github.com/skywolfmo/bookmarksai
+   git clone https://github.com/mlnomadpy/bookmarksai
    ```
 
 2. Navigate to the project directory and install dependencies:
