@@ -62,3 +62,5 @@ This project is licensed under the GNU V3 License - see the LICENSE file for det
 - All contributors who have helped shape Bookmarks AI.
 - https://github.com/kylelobo/The-Documentation-Compendium
 
+yes
+
